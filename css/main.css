@@ -1,0 +1,41 @@
+body 
+{ 
+	font-family: sans-serif;
+	padding:10px;
+}
+
+tbody
+{
+	font-size:14px;
+}
+
+.off 
+{
+	color: rgb(192,192,192);
+	border:1px solid rgb(192,192,192);
+	padding:4px;
+}
+
+.on 
+{
+	border:1px solid rgb(128,128,128);
+	padding:4px;
+}
+
+/* External link */
+/*
+a[href^="http"]:after {
+	color: #ACAC65;
+	content: "\21D7";
+	font-size: 12px;
+	}
+*/
+
+/* http://meganmcdermott.com/2006/10/26/marking-external-links-with-css/*/
+a[rel="external"] {background:url(../images/external.png) 99% 40% no-repeat; padding-right: 15px;}
+
+
+a:link {text-decoration: none;}
+a:hover {text-decoration: underline;}
+
+.external a:link {text-decoration: underline;}
