@@ -13,7 +13,7 @@ require_once(dirname(__FILE__) . '/adodb5/adodb.inc.php');
 //--------------------------------------------------------------------------------------------------
 $db = NewADOConnection('mysql');
 $db->Connect("localhost", 
-	'root' , '' ,'nz');
+	'root' , '' ,'ion');
 
 // Ensure fields are (only) indexed by column name
 $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
