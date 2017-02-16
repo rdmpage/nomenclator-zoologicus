@@ -18,6 +18,8 @@ $db->Connect("localhost",
 // Ensure fields are (only) indexed by column name
 $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
 
+$db->EXECUTE("set nz 'utf8'"); 
+
 // how many rows to show per page
 $rowsPerPage = 20;
 
@@ -58,13 +60,21 @@ function do_query($query, $count_sql, $sql, $pageNum = 1)
 	{
 		$hit = new stdclass;
 		$hit->id = $result->fields['id'];
-		$hit->genus = $result->fields['genus'];
-		$hit->author = $result->fields['author'];
-		$hit->publication = $result->fields['publication'];
-		$hit->comments = $result->fields['comments'];
+		$hit->genus = utf8_encode($result->fields['genus']);
+		$hit->author = utf8_encode($result->fields['author']);
+		$hit->publication = utf8_encode($result->fields['publication']);
+		$hit->comments = utf8_encode($result->fields['comments']);
 		$hit->rdmp_comments = $result->fields['rdmp_comments'];
 		$hit->year = $result->fields['year'];
 		$hit->identifiers = array();
+		
+		// related name
+		if ($result->fields['related_name'])
+		{
+			$hit->related_name = $result->fields['related_name'];
+			$hit->related_id = $result->fields['related_id'];
+			$hit->relationship = $result->fields['relationship'];
+		}
 
 		$query_result->hits[] = $hit;
 
@@ -104,6 +114,8 @@ function do_query($query, $count_sql, $sql, $pageNum = 1)
 			$result->MoveNext();		
 		}
 	}
+	
+		
 	
 	
 	if ($pageNum > 1)
@@ -331,7 +343,8 @@ function display_page($q)
 	echo '<th style="border-bottom:1px solid black;">Citation</th>';
 	echo '<th style="border-bottom:1px solid black;">Comment</th>';
 	echo '<th style="border-bottom:1px solid black;">Year</th>';
-	echo '<th style="border-bottom:1px solid black;">Search</th>';
+	echo '<th style="border-bottom:1px solid black;">Year</th>';
+	echo '<th style="border-bottom:1px solid black;">Related</th>';
 	echo '<th style="border-bottom:1px solid black;">ION</th>';
 	echo '<th colspan="2" style="border-bottom:1px solid black;">BHL</th>';
 	echo '<th style="border-bottom:1px solid black;">BioStor</th>';
@@ -383,7 +396,7 @@ function display_page($q)
 		echo $hit->year;
 		echo '</td>';
 		
-		echo '<td align="center">';
+		
 		
 		$parameters = array();
 		
@@ -392,7 +405,20 @@ function display_page($q)
 		$parameters['publication'] = $hit->publication;
 		$parameters['year'] = $hit->year;
 		
-		$url = 'http://biostor.org/microcitation.php?' . http_build_query($parameters);
+		//-----------------
+		if (isset($hit->related_name))
+		{
+			echo '<td>';
+			echo '<a href="?genus=' . $hit->related_name . '">' . $hit->related_name . '</a>&nbsp;[' . $hit->related_id . ']';
+			echo '</td>';		
+		}
+		else
+		{
+			echo '<td></td>';
+		}		
+		
+		echo '<td align="center">';
+		$url = 'http://direct.biostor.org/microcitation.php?' . http_build_query($parameters);
 		
 		echo '<a href="' . $url . '" target="_new"><img src="images/magnifier.png" border="0"/></a>';
 		echo '</td>';
@@ -402,7 +428,7 @@ function display_page($q)
 		echo '<td align="right">';
 		if (isset($hit->identifiers['ion']))
 		{
-			echo '<a rel="external" href="http://www.organismnames.com/details.htm?lsid=' . $hit->identifiers['ion'] 
+			echo '<a rel="external" href="http://bionames.org/urn:lsid:organismnames.com:name:' . $hit->identifiers['ion'] 
 			. '" target="_new" title="Go to name in Index of Organism Names">' . $hit->identifiers['ion'] . '</a>';
 		}
 		echo '</td>';
@@ -414,7 +440,7 @@ function display_page($q)
 		if (isset($hit->identifiers['PageID']))
 		{
 			echo '<a class="thickbox" title="BHL page ' . $hit->identifiers['PageID'] 
-				. '" href="http://biostor.org/bhl_image.php?PageID=' . $hit->identifiers['PageID'] 
+				. '" href="http://biostor.org/page/image/' . $hit->identifiers['PageID'] . '-large.jpg'
 				. '" rel="gallery-bhl"><img border="0" src="images/picture_empty.png"></a>';
 		}
 		echo '</td>';
@@ -701,14 +727,14 @@ function main()
 	
 	if (isset($_GET['q']))
 	{
-		$query = $_GET['q'];
+		$query = trim($_GET['q']);
 		display_search($query, $mode);
 	}
 	
 	
 	if (isset($_GET['genus']))
 	{	
-		$genus = $_GET['genus'];
+		$genus = trim($_GET['genus']);
 		display_genus($genus, $pageNum);
 	}
 	

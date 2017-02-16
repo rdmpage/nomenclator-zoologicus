@@ -7,7 +7,7 @@ require_once(dirname(__FILE__) . '/utils.php');
 //--------------------------------------------------------------------------------------------------
 $db = NewADOConnection('mysql');
 $db->Connect("localhost", 
-	'root' , '' ,'nz');
+	'root' , '' ,'ion');
 
 // Ensure fields are (only) indexed by column name
 $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
@@ -48,6 +48,8 @@ $query = "Ent. News%";
 //$query = 'Zool. Anz.%';
 $query = 'Mém. Soc. zool. France%';
 
+$query = 'Bull. Brit. Orn. Cl.%';
+
 if (1)
 {
 	$sql = 'SELECT * FROM nz WHERE publication LIKE ' . $db->qstr($query);
@@ -63,6 +65,17 @@ else
 	
 	;
 }
+
+if (0)
+{
+	$author = 'Mathews 1925';
+
+	$sql = 'SELECT * FROM nz WHERE author = ' . $db->qstr($author);
+
+	echo $sql . "\n";
+}	
+
+
 
 
 $hits = array();
@@ -92,7 +105,7 @@ while (!$result->EOF)
 	$parameters['format'] = 'json';
 	
 	
-	$url = 'http://biostor.org/microcitation.php?' . http_build_query($parameters);
+	$url = 'http://direct.biostor.org/microcitation.php?' . http_build_query($parameters);
 	//echo $url . "\n";
 	
 	$json = get($url);
