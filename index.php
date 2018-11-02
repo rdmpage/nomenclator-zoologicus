@@ -66,6 +66,13 @@ function do_query($query, $count_sql, $sql, $pageNum = 1)
 		$hit->comments = utf8_encode($result->fields['comments']);
 		$hit->rdmp_comments = $result->fields['rdmp_comments'];
 		$hit->year = $result->fields['year'];
+		
+		
+		$hit->category = $result->fields['category'];
+		$hit->extinct = $result->fields['extinct'];
+		$hit->homonym = $result->fields['homonym'];
+		
+		
 		$hit->identifiers = array();
 		
 		// related name
@@ -330,7 +337,7 @@ function display_page($q)
 	echo '<table cellpadding="2" cellspacing="2" width="100%">';
 	
 	echo '<tr>';
-	echo '<th colspan="6" style="border-bottom:1px solid black;">Nomenclator Zoologicus</th>';
+	echo '<th colspan="11" style="border-bottom:1px solid black;">Nomenclator Zoologicus</th>';
 	echo '<td></td>';
 	echo '<td colspan="1"></td>';
 	echo '<th colspan="8" style="border-bottom:1px solid black;">Bibliographic identifiers</th>';
@@ -343,8 +350,16 @@ function display_page($q)
 	echo '<th style="border-bottom:1px solid black;">Citation</th>';
 	echo '<th style="border-bottom:1px solid black;">Comment</th>';
 	echo '<th style="border-bottom:1px solid black;">Year</th>';
-	echo '<th style="border-bottom:1px solid black;">Year</th>';
+	
+	echo '<th style="border-bottom:1px solid black;">Category</th>';
+	echo '<th style="border-bottom:1px solid black;">Extinct</th>';
+	echo '<th style="border-bottom:1px solid black;">Homonym</th>';
+
+
 	echo '<th style="border-bottom:1px solid black;">Related</th>';
+
+	echo '<th style="border-bottom:1px solid black;">Search</th>';
+
 	echo '<th style="border-bottom:1px solid black;">ION</th>';
 	echo '<th colspan="2" style="border-bottom:1px solid black;">BHL</th>';
 	echo '<th style="border-bottom:1px solid black;">BioStor</th>';
@@ -396,6 +411,16 @@ function display_page($q)
 		echo $hit->year;
 		echo '</td>';
 		
+
+		echo '<td>';
+		echo $hit->category;
+		echo '</td>';
+		echo '<td>';
+		echo $hit->extinct;
+		echo '</td>';
+		echo '<td>';
+		echo $hit->homonym;
+		echo '</td>';
 		
 		
 		$parameters = array();
