@@ -8,7 +8,7 @@ require_once(dirname(__FILE__) . '/micro.php');
 
 
 //--------------------------------------------------------------------------------------------------
-$db = NewADOConnection('mysql');
+$db = NewADOConnection('mysqli');
 $db->Connect("localhost", 
 	'root' , '' ,'ion');
 
