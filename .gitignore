@@ -3,3 +3,5 @@ harvest/junk/*
 harvest/html/*
 
 junk/*
+harvest/.DS_Store
+.DS_Store
