@@ -33,6 +33,23 @@ function parse ($publication)
 		}
 	}
 	
+	// Canad. Ent., 9, 70.
+	if (!$matched)
+	{
+		//echo $publication;
+		
+		$pattern = '/' . $journal_pattern . ',\s+' . $volume_pattern . ',\s+' . $page_pattern . '\.$/Uu';
+		//echo $pattern . "\n";
+		
+		if (preg_match($pattern, $publication, $m)) 
+		{
+			//print_r($m);
+			//echo __LINE__ . "\n";
+			$matched = true;
+		}
+	}
+	
+	
 	if (!$matched)
 	{
 		//echo $publication;
@@ -77,7 +94,8 @@ if (0)
 		'Genus (Wroclaw) 5(1-2), 30 June: 4.',
 		'Insecta Mundi 8(1-2), March-June: 81.',
 		'Annalen des Naturhistorischen Museums in Wien Serie A Mineralogie und Petrographie Geologie und Palaeontologie Anthropologie und Praehistorie 96A, Dezember: 22.',
-		'Vertebrata Palasiatica 32(3): 163.'
+		'Vertebrata Palasiatica 32(3): 163.',
+		'Canad. Ent., 9, 70.'
 	);
 	
 	foreach ($publications as $publication)
