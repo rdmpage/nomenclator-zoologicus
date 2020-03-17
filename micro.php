@@ -15,7 +15,7 @@ function parse ($publication)
 	$volume_pattern 	= "(?<volume>\d+[A-Z]?(-\d+)?)";
 	//$date_pattern 		= "(\d+\s+)?(\w+(-\w+)?)(\s+\d+)?";
 	$date_pattern 		= "(\d+\s+)?([A-Z]|[a-z]|\'|-)+(\s+\d+)?";
-	$journal_pattern 	= "(?<journal>.*)";
+	$journal_pattern 	= "(?<journal>.*)(\s+\((?<series>\d+)\))?";
 
 	// modern journal with date
 	if (!$matched)

@@ -1,5 +1,7 @@
 <?php
 
+// Look up citation in BioStor
+
 require_once(dirname(__FILE__) . '/adodb5/adodb.inc.php');
 require_once(dirname(__FILE__) . '/utils.php');
 
@@ -11,6 +13,9 @@ $db->Connect("localhost",
 
 // Ensure fields are (only) indexed by column name
 $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+
+$db->EXECUTE("set names 'utf8'"); 
+
 
 
 $query = "Aa%";
@@ -50,6 +55,14 @@ $query = 'Mém. Soc. zool. France%';
 
 $query = 'Bull. Brit. Orn. Cl.%';
 
+$query = 'Genera Insect.%';
+$query = 'Genera Insect., 205%';
+
+$query = 'Bull.U.S.natn.Mus. No.286%';
+
+$query = 'Ann. Transvaal Mus.%';
+
+
 if (1)
 {
 	$sql = 'SELECT * FROM nz WHERE publication LIKE ' . $db->qstr($query);
@@ -75,6 +88,14 @@ if (0)
 	echo $sql . "\n";
 }	
 
+if (0)
+{
+	$id = 62589;
+	$sql = 'SELECT * FROM nz WHERE id = '. $id;
+
+	
+}
+
 
 
 
@@ -93,6 +114,14 @@ while (!$result->EOF)
 	$hit->year = $result->fields['year'];
 	$hits[] = $hit;
 	
+	
+	
+	if (preg_match('/Bull.U.S.natn.Mus.\s*No.\s*(\d+): (\d+)/', $hit->publication, $m))
+	{
+		$hit->publication = 'Bulletin - United States National Museum, ' . $m[1] . ', ' . $m[2] . '.';
+	}
+	
+	
 	//print_r($hit);
 	
 	$parameters = array();
@@ -106,6 +135,8 @@ while (!$result->EOF)
 	
 	
 	$url = 'http://direct.biostor.org/microcitation.php?' . http_build_query($parameters);
+	echo "-- " . $hit->genus . " " . $hit->publication . "\n";
+	
 	//echo $url . "\n";
 	
 	$json = get($url);

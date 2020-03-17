@@ -264,6 +264,8 @@ while (!$done)
 	$sql = 'SELECT * FROM nz WHERE author LIKE "Soerensen%"  LIMIT ' . $page . ' OFFSET ' . $offset;
 
 	$sql = 'SELECT * FROM nz WHERE author ="Riley 1884" AND ion IS NULL  LIMIT ' . $page . ' OFFSET ' . $offset;
+
+//	$sql = 'SELECT * FROM nz WHERE Genus="Mesanthura" AND ion IS NULL  LIMIT ' . $page . ' OFFSET ' . $offset;
 	
 	
 

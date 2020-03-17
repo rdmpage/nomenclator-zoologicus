@@ -90,16 +90,24 @@ foreach (range('A', 'Z') as $letter)
 
 					$matched = true;
 
-
+					
 					$sql = 'UPDATE nz SET related_name="' . $related_name . '" WHERE id=' . $id . ';';
 					echo $sql . "\n";					
 					$sql = 'UPDATE nz SET related_id=' . $related_id . ' WHERE id=' . $id . ';';
 					echo $sql . "\n";
 					$sql = 'UPDATE nz SET relationship="' . $relationship_type . '" WHERE id=' . $id . ';';
 					echo $sql . "\n";
+					
+					
 
 				}
 			}
+			
+			if (!$matched)
+			{
+				echo "Not matched: $id $comments\n";
+
+			}			
 		
 			$count++;
 

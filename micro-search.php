@@ -17,7 +17,9 @@ $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
 
 $query = "Canad. Ent.%";
 
-if (0)
+$query = "Ann. Mag. nat. Hist. (13)%";
+
+if (1)
 {
 	$sql = 'SELECT * FROM nz WHERE publication LIKE ' . $db->qstr($query);
 }
@@ -41,11 +43,13 @@ if (0)
 
 if (1)
 {
-	$sql = 'SELECT * FROM nz WHERE id=225417';
+	$sql = 'SELECT * FROM nz WHERE id=253949';
 }
 
 
 $include_authors_in_search = true;
+$include_authors_in_search = false;
+
 $include_year_in_search = false;
 
 
@@ -68,12 +72,17 @@ while (!$result->EOF)
 	
 	$m = parse($hit->publication);
 	
-	print_r($m);	
+	//print_r($m);	
 	
 	$parameters = array();
 	
 	switch ($m['journal'])
 	{
+		case 'Ann. Mag. nat. Hist.':
+		case 'Ann. Mag. nat. Hist. Lond.':
+			$parameters['issn'] = '0374-5481';
+			break;
+
 		case 'Canad. Ent.':
 			$parameters['issn'] = '0008-347X';
 			break;
@@ -81,6 +90,10 @@ while (!$result->EOF)
 		default:
 			$parameters['issn'] = '0000-0000';
 			break;
+	}
+	if ($m['series'] != '')
+	{
+		$parameters['series'] = $m['series'];
 	}
 	
 	$parameters['volume'] = $m['volume'];
@@ -102,7 +115,7 @@ while (!$result->EOF)
 	
 	$url = 'http://localhost/~rpage/microcitation/www/index.php?' . http_build_query($parameters);
 	
-	//echo $url ."\n";
+	echo "--  $url\n";
 		
 	$json = get($url);
 	

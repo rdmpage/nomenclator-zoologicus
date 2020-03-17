@@ -88,6 +88,8 @@ function find_see($author, $comment)
 	
 	return $hit;
 }
+//----------------------------------------------------------------------------------------
+
 
 $page = 20;
 $offset = 0;
@@ -174,6 +176,13 @@ foreach (range('A', 'Z') as $letter)
 					}
 				}
 			}
+			
+			if (!$matched)
+			{
+				echo "Not matched\n";
+				//exit();
+
+			}			
 		
 			$count++;
 
