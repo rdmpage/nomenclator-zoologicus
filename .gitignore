@@ -5,3 +5,4 @@ harvest/html/*
 junk/*
 harvest/.DS_Store
 .DS_Store
+cache/*
