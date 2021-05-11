@@ -62,6 +62,8 @@ $query = 'Bull.U.S.natn.Mus. No.286%';
 
 $query = 'Ann. Transvaal Mus.%';
 
+$query = 'Australian Zool.%';
+
 
 if (1)
 {

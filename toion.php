@@ -267,6 +267,8 @@ while (!$done)
 
 //	$sql = 'SELECT * FROM nz WHERE Genus="Mesanthura" AND ion IS NULL  LIMIT ' . $page . ' OFFSET ' . $offset;
 	
+	$sql = 'SELECT * FROM nz WHERE Genus="Kerkophorus" AND ion IS NULL  LIMIT ' . $page . ' OFFSET ' . $offset;
+	
 	
 
 	$result = $db->Execute($sql);

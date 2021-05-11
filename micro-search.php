@@ -19,9 +19,22 @@ $query = "Canad. Ent.%";
 
 $query = "Ann. Mag. nat. Hist. (13)%";
 
+$query = "Cah% B% M%";
+
+$query = "Proc. malac. Soc. London%";
+
+
+$query = "Ann. Mag. nat. Hist., (8)%";
+
+$query = "Trans. Linn. Soc. London, (2)%";
+//$query = "Trans. Linn. Soc. London, Zool., (2)%";
+
+
 if (1)
 {
 	$sql = 'SELECT * FROM nz WHERE publication LIKE ' . $db->qstr($query);
+	
+	//$sql .= ' AND year=1931';
 }
 else
 {
@@ -32,19 +45,27 @@ else
 	;
 }
 
+
+
 if (0)
 {
 	$author = 'Mathews 1925';
 
 	$sql = 'SELECT * FROM nz WHERE author = ' . $db->qstr($author);
+	
 
-	echo $sql . "\n";
+	$sql = 'SELECT * FROM nz WHERE author = "Distant 1910" AND publication LIKE "Ann%"';
+
+
+	// echo $sql . "\n";
 }	
 
-if (1)
+if (0)
 {
-	$sql = 'SELECT * FROM nz WHERE id=253949';
+	$sql = 'SELECT * FROM nz WHERE id=59025';
 }
+
+
 
 
 $include_authors_in_search = true;
@@ -54,6 +75,8 @@ $include_year_in_search = false;
 
 
 $hits = array();
+
+$fail = array();
 
 $result = $db->Execute($sql);
 if ($result == false) die("failed [" . __LINE__ . "]: " . $sql);
@@ -72,7 +95,9 @@ while (!$result->EOF)
 	
 	$m = parse($hit->publication);
 	
-	//print_r($m);	
+	echo "-- " . $hit->publication . "\n";
+	
+	// print_r($m);	
 	
 	$parameters = array();
 	
@@ -82,13 +107,47 @@ while (!$result->EOF)
 		case 'Ann. Mag. nat. Hist. Lond.':
 			$parameters['issn'] = '0374-5481';
 			break;
+			
+		case 'Cah Biol Mar':
+		case 'Cah. Biol. mar.':
+		case 'Cahiers Biol. mar.':
+		case 'Cahiers de Biologie Marine':
+			$parameters['issn'] = '0007-9723';
+			break;
 
 		case 'Canad. Ent.':
 			$parameters['issn'] = '0008-347X';
 			break;
 	
+		case 'Proc. malac. Soc. London':
+		case 'Proc. Malac. Soc. London':
+			$parameters['issn'] = '0025-1194';
+			break;
+			
+		case 'Trans. Linn. Soc. London, Zool.':
+		case 'Trans. Linn. Soc. London, (2) Zool.':
+			$parameters['issn'] = '1945-9440';
+			break;
+			
+		case 'Trans. Linn. Soc. London':
+		
+			// Transactions of the Linnean Society of London. 2nd Series. Zoology	
+			if ($hit->year >= 1875 && $hit->year <= 1936)
+			{
+				$parameters['issn'] = '1945-9440';
+			}		
+			break;
+			
+	
 		default:
 			$parameters['issn'] = '0000-0000';
+			
+			echo "-- Can't match journal to ISSN: " . $m['journal'] . "\n";
+			
+			$fail[] = $hit->publication;
+			//print_r($m);	
+			//exit();
+			
 			break;
 	}
 	if ($m['series'] != '')
@@ -127,18 +186,43 @@ while (!$result->EOF)
 
 	if (isset($obj->found) && $obj->found)
 	{
-		if (count($obj->results) == 1)
-		{	
-			if (isset($obj->results[0]->doi))
-			{
-				$sql = 'INSERT INTO nz_id(id, namespace, identifier) VALUES (' . $hit->id . ',"doi","' . $obj->results[0]->doi . '");';
+		// default
+		if (1)
+		{
+			if (count($obj->results) == 1)
+			{	
+				if (isset($obj->results[0]->doi))
+				{
+					$sql = 'REPLACE INTO nz_id(id, namespace, identifier) VALUES (' . $hit->id . ',"doi","' . $obj->results[0]->doi . '");';
 				
-				echo $sql . "\n";			
+					echo $sql . "\n";			
+				}
 			}
 		}
+		
+		else
+		{
+		
+			// If we have multiples because I have too many copies in mciro database
+			foreach ($obj->results as $r)
+			{
+				if (isset($r->doi))
+				{
+					$sql = 'INSERT INTO nz_id(id, namespace, identifier) VALUES (' . $hit->id . ',"doi","' . $r->doi . '");';
+				
+					echo $sql . "\n";			
+				}
+			}
+		}
+		
+		
+		
 	}
 	
 	$result->MoveNext();		
 }
+
+
+print_r($fail);
 
 ?>
