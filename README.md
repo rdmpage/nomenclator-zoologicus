@@ -23,7 +23,20 @@ inner join nz_related ON nz.id = nz_related.id
 where nz_related.related_id= 106118;
 ```
 
-2022-05-25 Currently `nz` doesn’t do this correctly, `nz.related_id` should be the same as `nz_related.related_id`. Will need to reload and also reclassify the relationships. Could use [Nomenclatural Status GBIF Vocabulary](https://rs.gbif.org/vocabulary/gbif/nomenclatural_status.xml)
+2022-05-25 Currently `nz` doesn’t do this correctly, `nz.related_id` should be the same as `nz_related.related_id`. Will need to reload and also reclassify the relationships. Could use [Nomenclatural Status GBIF Vocabulary](https://rs.gbif.org/vocabulary/gbif/nomenclatural_status.xml) If we export this as Darwin Core could use [Darwin Core Resource Relationship](https://rs.gbif.org/extension/dwc/resource_relationship_2022-02-02.xml)
+
+```mermaid
+graph LR
+ 
+    id(id) --> |genus| genus[genus name]
+    id --> |author| author[author of name]
+    id --> |publication| publication[publication details]
+    id --> |year| year
+    id --> |comments| comments[comments on name]
+     id --> |category| category[higher taxon genus belongs to]
+   id -->|related| related_id(related_id, 1:n) 
+    id -->|identifier| identifier[bibliographic identifier such as DOI, n:1]
+```  
 
 
 ## Notes
