@@ -17,6 +17,51 @@ function parse ($publication)
 	$date_pattern 		= "(\d+\s+)?([A-Z]|[a-z]|\'|-)+(\s+\d+)?";
 	$journal_pattern 	= "(?<journal>.*)(\s+\((?<series>\d+)\))?";
 	
+	// J. Proc. Linn. Soc. London, Zool., 7 (1864), 61.
+	if (!$matched)
+	{
+		//echo $publication;
+		
+		$pattern = '/(?<journal>.*),\s+(?<volume>\d+),?\s+\(?[0-9]{4}\)?,?\s+(?<page>\d+)\./Uu';
+		
+		if (preg_match($pattern, $publication, $m)) 
+		{
+			//print_r($m);
+			//exit();
+			//echo __LINE__ . "\n";
+			$matched = true;
+		}
+	}	
+	
+	
+	// Acta ent. sin. 10: 442, 448.
+	if (!$matched)
+	{
+		//echo $publication;
+		
+		$pattern = '/' . $journal_pattern . '\s+' . $volume_pattern . ':\s+' . $page_pattern . '\,\s+\d+/Uu';
+		//echo $pattern . "\n";
+		
+		if (preg_match($pattern, $publication, $m)) 
+		{
+			//print_r($m);
+			//exit();
+			//echo __LINE__ . "\n";
+			$matched = true;
+		}
+	}	
+	
+	// Kontyu 54 (2): 308.	
+	if (!$matched)
+	{
+		if (preg_match('/(?<journal>.*)\s+(?<volume>\d+)\s*\((?<issue>\d+)\):\s*(?<page>\d+)\./', $publication, $m)) 
+		{
+			//print_r($m);
+			//echo __LINE__ . "\n";
+			$matched = true;
+		}
+	}	
+	
 	// Ann. Mag. nat. Hist., (8) 1, 129, 131.
 	if (!$matched)
 	{
@@ -35,7 +80,7 @@ function parse ($publication)
 	{
 		//echo $publication;
 		
-		if (preg_match('/(?<journal>.*),\s+\((?<series>\d+)\)\s+(?<volume>\d+),\s*(?<page>\d+)\./', $publication, $m)) 
+		if (preg_match('/(?<journal>.*),\s+\((?<series>\d+)\)\s+(?<volume>\d+),\s*(?<page>\d+)\.?$/', $publication, $m)) 
 		{
 			//print_r($m);
 			//echo __LINE__ . "\n";
@@ -145,7 +190,7 @@ function parse ($publication)
 	{
 		//echo $publication;
 		
-		$pattern = '/' . $journal_pattern . ':\s*' . $page_pattern . '\.$/Uu';
+		$pattern = '/' . $journal_pattern . '[:|,]\s*' . $page_pattern . '\.$/Uu';
 		//echo $pattern . "\n";
 		
 		if (preg_match($pattern, $publication, $m)) 
@@ -155,6 +200,7 @@ function parse ($publication)
 			$matched = true;
 		}
 	}
+	
 	
 	
 	//print_r($m);
@@ -173,6 +219,9 @@ if (0)
 		'Canad. Ent., 9, 70.',
 		'Ann. Mag. nat. Hist., (8) 1, 129, 131.'
 	);
+	
+	$publications = array('Acta ent. sin. 9: 366, 370.');
+	
 	
 	foreach ($publications as $publication)
 	{

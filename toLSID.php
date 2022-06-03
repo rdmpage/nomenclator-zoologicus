@@ -1,8 +1,11 @@
 <?php
 
+error_reporting(E_ALL);
+
+require_once('vendor/autoload.php');
+
 
 // export to RDF
-
 
 
 require_once(dirname(__FILE__) . '/adodb5/adodb.inc.php');
@@ -72,17 +75,23 @@ while (!$done)
 	$sql = 'SELECT * FROM nz WHERE genus LIKE "Pseudomaenas%"';
 	
 	$sql = 'SELECT * FROM nz WHERE genus LIKE "Neoarct%"';
-	$sql = 'SELECT * FROM nz WHERE genus LIKE "Ventidius%"';
+	//$sql = 'SELECT * FROM nz WHERE genus LIKE "Ventidius%"';
 	
 	/*
 	$sql = 'SELECT * FROM nz WHERE genus LIKE "Prionostemma"';
 	$sql = 'SELECT * FROM nz WHERE genus LIKE "Prionomma"';
+*/
 
-	$sql = 'SELECT * FROM nz WHERE genus IN ("Prionostemma", "Prionomma")';
-	*/
+	//$sql = 'SELECT * FROM nz WHERE genus IN ("Prionostemma", "Prionomma")';
+	
 	
 
 	//$sql = 'SELECT * FROM nz WHERE author LIKE "Distant 1910%"';
+	
+	$sql = 'SELECT * FROM nz ';
+	
+	//$sql = 'SELECT * FROM nz WHERE genus LIKE "Prion%"';
+	
 	
 	$sql .= ' LIMIT ' . $page . ' OFFSET ' . $offset;
 			
@@ -90,6 +99,9 @@ while (!$done)
 	if ($result == false) die("failed [" . __LINE__ . "]: " . $sql);
 	while (!$result->EOF) 
 	{
+		echo ".";
+	
+	
 		$hit = new stdclass;
 		$hit->id = $result->fields['id'];
 		$hit->genus = utf8_encode($result->fields['genus']);
@@ -145,12 +157,13 @@ while (!$done)
 		{
 			print_r($hit);
 		}
-		
-		
+
 		// to triples
 		$triples = array();
 		
 		$subject_id = 'http://www.ubio.org/NZ/detail.php?uid=' . $hit->id . '&d=1';
+		
+		$subject_id = 'urn:lsid:ubio.org:nz:' . $hit->id;
 		
 		// type
 		$triples[] =  '<' . $subject_id . '> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://rs.tdwg.org/ontology/voc/TaxonName#TaxonName> . ';
@@ -180,6 +193,33 @@ while (!$done)
 		{
 			$triples[] =  '<' . $subject_id . '> <http://rs.tdwg.org/ontology/voc/TaxonName#year> "' . addcslashes($hit->year, '"') . '" . ';		
 		}
+		
+		// classification
+		if (isset($hit->category))
+		{
+			$triples[] =  '<' . $subject_id . '> <http://rs.tdwg.org/dwc/terms/higherClassification> "' . addcslashes($hit->category, '"') . '" . ';				
+		}
+		
+		/*
+		// classification
+		if (isset($hit->extinct))
+		{
+			$triples[] =  '<' . $subject_id . '> <http://rs.gbif.org/terms/1.0/isExtinct> "TRUE" . ';				
+		}
+		else
+		{
+			$triples[] =  '<' . $subject_id . '> <http://rs.gbif.org/terms/1.0/isExtinct> "FALSE" . ';				
+		}
+		*/
+		
+		// comments
+		
+		// homonym?
+		if (isset($hit->homonym))
+		{
+			$triples[] =  '<' . $subject_id . '> <http://rs.tdwg.org/dwc/terms/nomenclaturalStatus> "homonym" . ';				
+		}
+		
 
 		// related names
 		
@@ -195,82 +235,28 @@ while (!$done)
 			{
 				$triples[] =  '<' . $annotation_id . '> <http://rs.tdwg.org/ontology/voc/TaxonName#noteType> <http://rs.tdwg.org/ontology/voc/TaxonName#replacementNameFor> . ';		
 				$triples[] =  '<' . $annotation_id . '> <http://rs.tdwg.org/ontology/voc/TaxonName#subjectTaxonName> <' . $subject_id . '> . ';		
-				$triples[] =  '<' . $annotation_id . '> <http://rs.tdwg.org/ontology/voc/TaxonName#objectTaxonName> <http://www.ubio.org/NZ/detail.php?uid=' . $hit->related_id . '&d=1> . ';		
+				$triples[] =  '<' . $annotation_id . '> <http://rs.tdwg.org/ontology/voc/TaxonName#objectTaxonName> <urn:lsid:ubio.org:nz:' . $hit->related_id . '> . ';		
 			}
 			
 		
 		}
+		
+		// link to website
+		$triples[] =  '<' . $subject_id . '> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://www.ubio.org/NZ/detail.php?uid=' . $hit->id . '&d=1> . ';		
+		
+		// print_r($triples);
+		
+	$g = new \EasyRdf\Graph();
+	$g->parse(join("\n", $triples));
+		
+	$options = array();
+		
+	$format = \EasyRdf\Format::getFormat('rdfxml');
+	$xml = $g->serialise($format, $options);
+	
+	//print_r($data);
 		
 	
-		// identifiers
-		/*
-		$publishedInCitation = '';
-		
-		foreach ($hit->identifiers as $k => $v)
-		{
-			switch ($k)
-			{
-				case 'doi':
-					if ($publishedInCitation == '')
-					{
-						$publishedInCitation = $subject_id . '#publishedInCitation';
-						$triples[] =  '<' . $subject_id . '> <http://rs.tdwg.org/ontology/voc/Common#publishedInCitation> <' . $publishedInCitation . '> . ';		
-					}
-				
-					$triples[] =  '<' . $publishedInCitation . '> <http://schema.org/sameAs> <https://doi.org/' . strtolower($v) . '> . ';		
-					break;
-					
-				case 'biostor':
-					if ($publishedInCitation == '')
-					{
-						$publishedInCitation = $subject_id . '#publishedInCitation';
-						$triples[] =  '<' . $subject_id . '> <http://rs.tdwg.org/ontology/voc/Common#publishedInCitation> <' . $publishedInCitation . '> . ';		
-					}
-				
-					$triples[] =  '<' . $publishedInCitation . '> <http://schema.org/sameAs> <https://biostor.org/reference/' . $v . '> . ';		
-					break;
-										
-				// to do
-				case 'jstor':
-				case 'handle':
-					break;
-					
-				case 'bhl':
-					break;
-					
-				case 'ion':
-					$triples[] =  '<' . $subject_id . '> <http://schema.org/sameAs> <urn:lsid:organismnames.com:name:' . $v . '> . ';		
-					break;
-			
-			
-				default:
-					break;
-			}
-		
-		
-		}
-		*/
-		
-/*
-    <tn:nameComplete>Ochyrocera jarocha</tn:nameComplete>
-    <tn:genusPart>Ochyrocera</tn:genusPart>
-    <tn:specificEpithet>jarocha</tn:specificEpithet>
-    <tn:infraspecificEpithet/>
-    <tn:authorship>Valdez-Mondragón</tn:authorship>
-    <tn:year>2017</tn:year>
-    <dwc:nomenclaturalCode>ICZN</dwc:nomenclaturalCode>
-    <nmbe:statusString>VALID</nmbe:statusString>
-*/		
-		
-		if ($debug)
-		{
-			print_r($triples);
-		}
-		else
-		{		
-			echo join("\n", $triples) . "\n\n";		
-		}
-		
 		$dir = floor($hit->id / 1000);
 		
 		$dir = dirname(__FILE__) . "/$basedir/" . $dir;
@@ -281,14 +267,17 @@ while (!$done)
 			umask($oldumask);
 		}
 		
-		$f = $dir . '/' . $hit->id . '.nt';
+		$f = $dir . '/' . $hit->id . '.xml';
 		$file = fopen($f, "w");
-		fwrite($file, join("\n", $triples));
+		fwrite($file, $xml);
 		fclose($file);
+		
 		
 
 		$result->MoveNext();		
 	}
+	
+	echo "\n";
 	
 	if ($result->NumRows() < $page)
 	{
@@ -296,6 +285,10 @@ while (!$done)
 	}
 	else
 	{
+		// catch our breath
+		
+		sleep(2);
+		
 		$offset += $page;
 		
 		// If we want to bale out and check it worked

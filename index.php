@@ -361,6 +361,7 @@ function display_page($q)
 	echo '<th style="border-bottom:1px solid black;">Search</th>';
 
 	echo '<th style="border-bottom:1px solid black;">ION</th>';
+	echo '<th style="border-bottom:1px solid black;">Wikidata</th>';
 	echo '<th colspan="2" style="border-bottom:1px solid black;">BHL</th>';
 	echo '<th style="border-bottom:1px solid black;">BioStor</th>';
 	echo '<th style="border-bottom:1px solid black;">DOI</th>';
@@ -457,6 +458,16 @@ function display_page($q)
 			. '" target="_new" title="Go to name in Index of Organism Names">' . $hit->identifiers['ion'] . '</a>';
 		}
 		echo '</td>';
+		
+		// Wikidata
+		echo '<td align="right">';
+		if (isset($hit->identifiers['wikidata']))
+		{
+			echo '<a rel="external" href="http://www.wikidata.org/entity/' . $hit->identifiers['wikidata'] 
+			. '" target="_new" title="Wikidata">' . $hit->identifiers['wikidata'] . '</a>';
+		}
+		echo '</td>';
+		
 		
 		//-----------------
 		// BHL

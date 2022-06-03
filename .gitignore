@@ -7,3 +7,7 @@ harvest/.DS_Store
 .DS_Store
 cache/*
 harvest/.DS_Store
+
+/vendor/
+
+/lsid/

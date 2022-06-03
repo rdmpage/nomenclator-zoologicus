@@ -112,6 +112,7 @@ foreach (range('A', 'Z') as $letter)
 		$sql = 'SELECT * FROM `nz` WHERE comments LIKE "(pro ' . $letter . '%" LIMIT ' . $page . ' OFFSET ' . $offset;
 		$sql = 'SELECT * FROM `nz` WHERE comments LIKE "(emend. pro ' . $letter . '%" LIMIT ' . $page . ' OFFSET ' . $offset;
 		
+		$sql = 'SELECT * FROM `nz` WHERE genus="Rhysida" LIMIT ' . $page . ' OFFSET ' . $offset;
 	
 		echo "-- $sql\n";
 		

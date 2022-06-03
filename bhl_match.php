@@ -1,6 +1,6 @@
 <?php
 
-// Match NZ to a BHL item
+// Match NZ to a BHL a item using the API
 
 
 $config['cache']   = dirname(__FILE__) . '/cache';
@@ -99,6 +99,23 @@ function get_item($ItemID, $force = false)
 $ItemID = 42909;
 $sql = 'SELECT * FROM nz WHERE publication LIKE "Arch. ent. Paris, 1,%"';
 
+
+$ItemID = 110504;
+$sql = 'SELECT * FROM nz WHERE publication LIKE "Lep. Ceylon, 1,%"';
+
+$ItemID = 110500;
+$sql = 'SELECT * FROM nz WHERE publication LIKE "Lep. Ceylon, 2,%"';
+
+$ItemID = 36660;
+$sql = 'SELECT * FROM nz WHERE publication LIKE "Lep. Ceylon, 3,%"';
+
+$ItemID = 35169;
+$sql = 'SELECT * FROM nz WHERE publication LIKE "Catal. Blattariae Brit. Mus.%"';
+
+
+
+
+// Get Item from BHL
 $item = get_item($ItemID);
 
 
@@ -137,6 +154,7 @@ foreach ($item->Result->Pages as $Page)
 // exit();
 
 // get NZdata
+//echo $sql;
 
 $result = $db->Execute($sql);
 if ($result == false) die("failed [" . __LINE__ . "]: " . $sql);
@@ -148,11 +166,13 @@ while (!$result->EOF)
 	$hit->author = utf8_encode($result->fields['author']);
 	$hit->publication = utf8_encode($result->fields['publication']);
 	
+	//print_r($hit);
+	
 	// get page number
 	
 	$m = parse($hit->publication);
 	
-	// print_r($m);
+	//print_r($m);
 	
 	if (isset($m['page']))
 	{

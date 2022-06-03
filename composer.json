@@ -1,0 +1,13 @@
+{
+    "name": "rpage/nomenclator-zoologicus",
+    "require": {
+        "easyrdf/easyrdf": "^1.1",
+         "ml/json-ld": "^1.2"
+    },
+    "authors": [
+        {
+            "name": "Roderic Page",
+            "email": "rdmpage@gmail.com"
+        }
+    ]
+}

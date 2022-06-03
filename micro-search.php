@@ -1,6 +1,6 @@
 <?php
 
-// Match micro citations to identifiers using microcitation service
+// Match micro citations to identifiers using my microcitation service
 
 require_once(dirname(__FILE__) . '/adodb5/adodb.inc.php');
 require_once(dirname(__FILE__) . '/micro.php');
@@ -13,6 +13,9 @@ $db->Connect("localhost",
 
 // Ensure fields are (only) indexed by column name
 $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
+
+$db->EXECUTE("set names 'utf8'"); 
+
 
 
 $query = "Canad. Ent.%";
@@ -28,6 +31,25 @@ $query = "Ann. Mag. nat. Hist., (8)%";
 
 $query = "Trans. Linn. Soc. London, (2)%";
 //$query = "Trans. Linn. Soc. London, Zool., (2)%";
+
+$query = "J. Wash. Acad. Sci.%";
+
+$query = "New Zealand J. Zool.%";
+
+$query = "Can.Ent.%";
+$query = "Can. Ent.%";
+//$query = "Canad. Ent.%";
+
+$query = "Ann. ent. Soc. Amer.%";
+
+$query = "J.Kans.ent.Soc.%";
+
+$query = "Kontyu%";
+
+$query = "Acta ent. sin.%";
+
+$query = "J. Proc. Linn. Soc. London, Zool.%";
+
 
 
 if (1)
@@ -49,20 +71,23 @@ else
 
 if (0)
 {
-	$author = 'Mathews 1925';
+	$author = 'Marsh 1879';
 
 	$sql = 'SELECT * FROM nz WHERE author = ' . $db->qstr($author);
 	
+	
+	$sql = 'SELECT * FROM nz WHERE publication LIKE "Amer. J. Sci.%" AND year LIKE "186%" LIMIT 10';
+	
 
-	$sql = 'SELECT * FROM nz WHERE author = "Distant 1910" AND publication LIKE "Ann%"';
+	//$sql = 'SELECT * FROM nz WHERE author = "Distant 1910" AND publication LIKE "Ann%"';
 
 
 	// echo $sql . "\n";
 }	
 
-if (0)
+if (1)
 {
-	$sql = 'SELECT * FROM nz WHERE id=59025';
+	$sql = 'SELECT * FROM nz WHERE id=57732';
 }
 
 
@@ -77,6 +102,8 @@ $include_year_in_search = false;
 $hits = array();
 
 $fail = array();
+
+$missed = array();
 
 $result = $db->Execute($sql);
 if ($result == false) die("failed [" . __LINE__ . "]: " . $sql);
@@ -93,9 +120,19 @@ while (!$result->EOF)
 	
 	//print_r($hit);
 	
+	// hack
+	if (!preg_match('/\.$/', $hit->publication))
+	{
+		$hit->publication .= '.';
+	}
+	$hit->publication = preg_replace('/\s+\.$/', '.', $hit->publication);
+	
 	$m = parse($hit->publication);
 	
 	echo "-- " . $hit->publication . "\n";
+	
+	
+	
 	
 	// print_r($m);	
 	
@@ -103,6 +140,21 @@ while (!$result->EOF)
 	
 	switch ($m['journal'])
 	{
+		case 'Acta ent. sin.':
+			$parameters['issn'] = '0454-6296';
+			break;
+		
+	
+		case 'Amer. J. Sci.':
+			$parameters['issn'] = '0002-9599';
+			break;
+			
+		case 'Ann. ent. Soc. Amer.':
+		case 'Ann. ent. Soc. Amer., Columbus':
+		case 'Ann. Ent. Soc. Amer.':
+			$parameters['issn'] = '0013-8746';
+			break;
+	
 		case 'Ann. Mag. nat. Hist.':
 		case 'Ann. Mag. nat. Hist. Lond.':
 			$parameters['issn'] = '0374-5481';
@@ -116,8 +168,35 @@ while (!$result->EOF)
 			break;
 
 		case 'Canad. Ent.':
+		case 'Can. Ent.':
+		case 'Can.Ent.':
 			$parameters['issn'] = '0008-347X';
 			break;
+			
+		case 'J.Kans.ent.Soc.':
+		case 'J.Kans.Ent.Soc.':
+			$parameters['issn'] = '0022-8567';
+			break;
+			
+		case 'J. Proc. Linn. Soc. London, Zool.':
+			$parameters['issn'] = '1945-9475';
+			break;
+		
+		case 'J. Wash. Acad. Sci.':
+			$parameters['issn'] = '0043-0439';
+			break;
+			
+		case 'Kontyu':
+		case 'Kontyû':
+			$parameters['issn'] = '0013-8770';
+			break;
+		
+
+		case 'New Zealand J. Zool.':
+			$parameters['issn'] = '0301-4223';
+			break;
+			
+			
 	
 		case 'Proc. malac. Soc. London':
 		case 'Proc. Malac. Soc. London':
@@ -155,8 +234,23 @@ while (!$result->EOF)
 		$parameters['series'] = $m['series'];
 	}
 	
+	if ($m['issue'] != '')
+	{
+		$parameters['issue'] = $m['issue'];
+	}
+	
+	
 	$parameters['volume'] = $m['volume'];
 	$parameters['page'] = $m['page'];
+	
+	// special cases
+	if ($parameters['issn'] == '0002-9599' && isset($parameters['series']))
+	{
+		$parameters['volume'] = 's' . $parameters['series'] . '-' . $parameters['volume'];
+		unset($parameters['series']);
+	}
+	
+	
 	
 	if ($include_authors_in_search)
 	{
@@ -182,7 +276,7 @@ while (!$result->EOF)
 	
 	$obj = json_decode($json);
 
-	//print_r($obj);
+	// print_r($obj);
 
 	if (isset($obj->found) && $obj->found)
 	{
@@ -197,7 +291,31 @@ while (!$result->EOF)
 				
 					echo $sql . "\n";			
 				}
+
+				if (isset($obj->results[0]->jstor))
+				{
+					$sql = 'REPLACE INTO nz_id(id, namespace, identifier) VALUES (' . $hit->id . ',"jstor","' . $obj->results[0]->jstor . '");';
+				
+					echo $sql . "\n";			
+				}
+				
+				if (isset($obj->results[0]->wikidata))
+				{
+					$sql = 'REPLACE INTO nz_id(id, namespace, identifier) VALUES (' . $hit->id . ',"wikidata","' . $obj->results[0]->wikidata . '");';
+				
+					echo $sql . "\n";			
+				}
+				
+				if (isset($obj->results[0]->cinii))
+				{
+					$sql = 'REPLACE INTO nz_id(id, namespace, identifier) VALUES (' . $hit->id . ',"cinii","' . $obj->results[0]->cinii . '");';
+				
+					echo $sql . "\n";			
+				}
+				
+				
 			}
+			
 		}
 		
 		else
@@ -218,11 +336,18 @@ while (!$result->EOF)
 		
 		
 	}
+	else
+	{
+		$missed[] = $hit->publication;
+	}
 	
 	$result->MoveNext();		
 }
 
+echo "\nPublication strings not matched to database\n";
+print_r($missed);
 
+echo "\nPublication strings not parsed\n";
 print_r($fail);
 
 ?>

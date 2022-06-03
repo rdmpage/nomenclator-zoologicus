@@ -16,6 +16,7 @@ $ADODB_FETCH_MODE = ADODB_FETCH_ASSOC;
 
 $db->EXECUTE("set names 'utf8'"); 
 
+$debug = true;
 $debug = false;
 
 //----------------------------------------------------------------------------------------
@@ -79,6 +80,7 @@ $count = 0;
 
 $done = false;
 
+// what patterns match this suffix?
 $suffix_patterns = array(
 
 	'aeetus' => '/(aetus|aëtos|aethus)/',
@@ -86,6 +88,8 @@ $suffix_patterns = array(
 	'ma' => '/(mas|mum|mus|me|mia|mis)$/',
 	
 	'noura' => '/nura$/',
+
+	'otoma' => '/ostoma$/',
 	
 	
 	'za' => '/(zia|zusa|sa|zus|zias|so|zo)$/',
@@ -102,6 +106,11 @@ $suffixes = array(
 $suffixes = array(
 'noura'
 );
+
+$suffixes = array(
+'otoma'
+);
+
 
 foreach ($suffixes as $suffix)
 {
@@ -173,6 +182,12 @@ foreach ($suffixes as $suffix)
 								echo "-- $other_genus " . $m['author'] . " not found ***\n";
 							}
 						}
+					}
+					else
+					{
+						echo "*** BUG you need to set a suffix_patterns[] for $suffix *** \n";
+						exit();
+					
 					}
 				}
 			}
